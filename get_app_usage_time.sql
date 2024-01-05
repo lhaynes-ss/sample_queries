@@ -13,8 +13,8 @@ USE SCHEMA PUBLIC;
 
 
 -- set variables
-SET report_start_datetime = (SELECT '2024-01-01 10:30:00'::TIMESTAMP);
-SET report_end_datetime = (SELECT '2024-01-01 12:30:00'::TIMESTAMP);
+SET report_start_datetime = '2024-01-01 10:30:00'::TIMESTAMP;
+SET report_end_datetime = '2024-01-01 12:30:00'::TIMESTAMP;
 SET report_country = 'US';
 SET report_app = 'Apple TV';
 
