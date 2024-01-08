@@ -1,6 +1,7 @@
 /*******************
 * Get Samsung Universe
 * Estimated runtime: approx 2 mins
+* !!! NOTE: THIS LOGIC HAS BEEN DEPRECATED !!!
 *******************/
 
 -- Connection settings
