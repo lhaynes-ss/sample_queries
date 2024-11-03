@@ -68,7 +68,6 @@ We created two functions.
 
 
 
-
 ## Simple Function
 
 ```
@@ -223,4 +222,43 @@ SET code = (SELECT udw_clientsolutions_cs.udf_submit_slack_notification_custom(
                     "message": "This is just a test!!"
                 }'
             ));
+```
+
+# Logs and debugging
+Code blocks and stored procedures only output what you return. I have found it helpful to create a log array, append messages through out key points in the query, and append the log to the error message if the script fails. This not only tells me what went wrong but gives a better idea of where in the script the failure occoured.
+
+```
+DECLARE
+    log             ARRAY;      --> array to store log messages for debugging
+    log_message     VARCHAR;    --> message to add to the log array. For debugging.
+```
+```
+BEGIN
+    -- init logging
+    log := ARRAY_CONSTRUCT();
+    log_message := '';
+```
+```
+    -- log message (e.g., Region EU processing completed.)
+    log_message := 'Region ' || :region || ' processing completed.';
+    log := (SELECT ARRAY_APPEND(:log, :log_message));
+```
+```
+-- handle exception
+EXCEPTION
+    WHEN OTHER THEN
+        -- Task xyz failed. Error: (0, error message) || LOG: (message 1 => message 2 => message 3)
+        SELECT udw_clientsolutions_cs.udf_submit_slack_notification_simple(
+            slack_webhook_url => 'https://hooks.slack.com/triggers/E01HK7C170W/7564869743648/xxxxxxxxx'
+            ,date_string => :current_date::VARCHAR
+            ,name_string => 'Snowflake Task Monitor'
+            ,message_string => 'Task "' || :task_name || '" failed.' || 
+                ' Error: (' || :SQLCODE || ', ' || :SQLERRM || ')' ||
+                ' || LOG: (' || ARRAY_TO_STRING(:log, ' => ') || ')'
+        );
+
+        RETURN 'FAILED WITH ERROR(' || :SQLCODE || ', ' || :SQLERRM || ')';
+
+END;
+$$;
 ```
