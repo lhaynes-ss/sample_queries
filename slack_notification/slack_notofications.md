@@ -239,15 +239,18 @@ BEGIN
     log_message := '';
 ```
 ```
-    -- log message (e.g., Region EU processing completed.)
-    log_message := 'Region ' || :region || ' processing completed.';
+    -- log message (e.g., Region EU processing started.)
+    log_message := 'Region ' || :region || ' processing started.';
     log := (SELECT ARRAY_APPEND(:log, :log_message));
+
+    -- Error happens here 
+    -- log next region started. This wont be appended to the log so we know script failed before this point
 ```
 ```
 -- handle exception
 EXCEPTION
     WHEN OTHER THEN
-        -- Task xyz failed. Error: (0, error message) || LOG: (message 1 => message 2 => message 3)
+        -- Task xyz failed. Error: (0, error message) || LOG: ('Script started' => 'Region EU processing started.')
         SELECT udw_clientsolutions_cs.udf_submit_slack_notification_simple(
             slack_webhook_url => 'https://hooks.slack.com/triggers/E01HK7C170W/7564869743648/xxxxxxxxx'
             ,date_string => :current_date::VARCHAR
